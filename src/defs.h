@@ -614,6 +614,10 @@ typedef enum { // must be coordinated with s_fds_handle_desc in common.cpp
 #endif
     FD_HANDLE_MAX } fd_block_handler_t;
 
+
+
+#define MAX_NUMBER_OF_PAYLOADS 128
+
 struct user_params_t {
     work_mode_t mode; // either  client or server
     struct in_addr rx_mc_if_addr;
@@ -674,6 +678,8 @@ struct user_params_t {
     uint32_t dummy_mps;                   // client side only
     TicksDuration dummySendCycleDuration; // client side only
     uint32_t rate_limit;
+	unsigned int payload_integers_number;
+	int* actual_payload;
 };
 
 struct mutable_params_t {};

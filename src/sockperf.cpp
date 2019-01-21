@@ -125,6 +125,20 @@ static int proc_mode_throughput(int, int, const char **);
 static int proc_mode_playback(int, int, const char **);
 static int proc_mode_server(int, int, const char **);
 
+// helper function to generate payload for bluefield workloads
+void generate_payloads(int* ptr, int n) {
+    printf("Start generating data [%d] integer number in paylaod: %d\n", MAX_NUMBER_OF_PAYLOADS, n);
+    ptr = (int*) malloc(MAX_NUMBER_OF_PAYLOADS * n * sizeof(int));
+    for(int i = 0 ; i < MAX_NUMBER_OF_PAYLOADS ; i++) {
+        for(int j = 0 ; j < n ; j++) {
+            ptr[i * n + j] = i;
+        }
+    }
+    printf("payload is ready\n");
+}
+
+
+
 static const struct app_modes {
     int (*func)(int, int, const char **); /* proc function */
     const char *name;                     /* mode name to use from command line as an argument */
@@ -398,6 +412,11 @@ static int proc_mode_under_load(int id, int argc, const char **argv) {
           aopt_set_literal('r'),
           aopt_set_string("range"),
           "comes with -m <size>, randomly change the messages size in range: <size> +- <N>." },
+		{ 'n',
+          AOPT_ARG,
+          aopt_set_literal('n'),
+          aopt_set_string("payload number of integers"),
+          "Set number of integers to be sent in payload." },
         { 0, AOPT_NOARG, aopt_set_literal(0), aopt_set_string(NULL), NULL }
     };
 
@@ -591,6 +610,19 @@ static int proc_mode_under_load(int id, int argc, const char **argv) {
             } else {
                 log_msg("'-%c' Invalid value", 'r');
                 rc = SOCKPERF_ERR_BAD_ARGUMENT;
+            }
+        }
+		if ( !rc && aopt_check(self_obj, 'n') ) {
+            const char* optarg = aopt_value(self_obj, 'n');
+            if (optarg) {
+                int value = strtol(optarg, NULL, 0);
+                if (!isNumeric(optarg) || value < 0) {
+                    log_msg("'-%c' Invalid number of integers: %s", 'n', optarg);
+                    rc = SOCKPERF_ERR_BAD_ARGUMENT;
+                } else{
+                    s_user_params.payload_integers_number = value;
+                    generate_payloads(s_user_params.actual_payload, value);
+                }
             }
         }
     }
@@ -956,6 +988,11 @@ static int proc_mode_throughput(int id, int argc, const char **argv) {
           aopt_set_literal('r'),
           aopt_set_string("range"),
           "comes with -m <size>, randomly change the messages size in range: <size> +- <N>." },
+		{ 'n',
+          AOPT_ARG,
+          aopt_set_literal('n'),
+          aopt_set_string("payload number of integers"),
+          "Set number of integers to be sent in payload." },
         { 0, AOPT_NOARG, aopt_set_literal(0), aopt_set_string(NULL), NULL }
     };
 
@@ -1133,6 +1170,19 @@ static int proc_mode_throughput(int id, int argc, const char **argv) {
             } else {
                 log_msg("'-%c' Invalid value", 'r');
                 rc = SOCKPERF_ERR_BAD_ARGUMENT;
+            }
+        }
+		if ( !rc && aopt_check(self_obj, 'n') ) {
+            const char* optarg = aopt_value(self_obj, 'n');
+            if (optarg) {
+                int value = strtol(optarg, NULL, 0);
+                if (!isNumeric(optarg) || value < 0) {
+                    log_msg("'-%c' Invalid number of integers: %s", 'n', optarg);
+                    rc = SOCKPERF_ERR_BAD_ARGUMENT;
+                } else{
+                    s_user_params.payload_integers_number = value;
+                    generate_payloads(s_user_params.actual_payload, value);
+                }
             }
         }
     }

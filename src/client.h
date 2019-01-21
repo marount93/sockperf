@@ -45,6 +45,10 @@ protected:
     Message *m_pMsgRequest;
 };
 
+
+static unsigned char g_running_index = 0;
+
+
 //==============================================================================
 //==============================================================================
 template <class IoType, class SwitchDataIntegrity, class SwitchActivityInfo,
@@ -114,6 +118,12 @@ private:
         int ret = 0;
 
         m_pMsgRequest->incSequenceCounter();
+
+		//Maroun: modificatiosn for BlueField
+		int *payload = (int*)m_pMsgRequest->getData();
+		payload += 2; // Data alignment for GPU - (sockperf header is 14 bytes)
+		memcpy(payload, &(g_pApp->m_const_params.actual_payload[g_running_index * g_pApp->m_const_params.payload_integers_number]), sizeof(int) * g_pApp->m_const_params.payload_integers_number);
+		g_running_index = g_running_index + 1 >= MAX_NUMBER_OF_PAYLOADS ? 0 : g_running_index + 1;
 
         ret = m_pongModeCare.msg_sendto(ifd);
 

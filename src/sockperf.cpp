@@ -126,12 +126,12 @@ static int proc_mode_playback(int, int, const char **);
 static int proc_mode_server(int, int, const char **);
 
 // helper function to generate payload for bluefield workloads
-void generate_payloads(int* ptr, int n) {
+void generate_payloads(int** ptr, int n) {
     printf("Start generating data [%d] integer number in paylaod: %d\n", MAX_NUMBER_OF_PAYLOADS, n);
-    ptr = (int*) malloc(MAX_NUMBER_OF_PAYLOADS * n * sizeof(int));
+    *ptr = (int*) malloc(MAX_NUMBER_OF_PAYLOADS * n * sizeof(int));
     for(int i = 0 ; i < MAX_NUMBER_OF_PAYLOADS ; i++) {
         for(int j = 0 ; j < n ; j++) {
-            ptr[i * n + j] = i;
+            (*ptr)[i * n + j] = i;
         }
     }
     printf("payload is ready\n");
@@ -621,7 +621,7 @@ static int proc_mode_under_load(int id, int argc, const char **argv) {
                     rc = SOCKPERF_ERR_BAD_ARGUMENT;
                 } else{
                     s_user_params.payload_integers_number = value;
-                    generate_payloads(s_user_params.actual_payload, value);
+                    generate_payloads(&s_user_params.actual_payload, value);
                 }
             }
         }
@@ -1180,8 +1180,8 @@ static int proc_mode_throughput(int id, int argc, const char **argv) {
                     log_msg("'-%c' Invalid number of integers: %s", 'n', optarg);
                     rc = SOCKPERF_ERR_BAD_ARGUMENT;
                 } else{
-                    s_user_params.payload_integers_number = value;
-                    generate_payloads(s_user_params.actual_payload, value);
+		    		s_user_params.payload_integers_number = value;
+                    generate_payloads(&s_user_params.actual_payload, value);
                 }
             }
         }

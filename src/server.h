@@ -289,7 +289,9 @@ inline bool Server<IoType, SwitchActivityInfo, SwitchCalcGaps>::server_receive_t
 
         g_receiveCount++; //// should move to setRxTime (once we use it in server side)
 
+        printf("Message in server\n");
         if (m_pMsgReply->getHeader()->isPongRequest()) {
+            printf("Pong\n");
             /* if server in a no reply mode - shift to start of cycle buffer*/
             if (g_pApp->m_const_params.b_server_dont_reply) {
 #ifdef USING_VMA_EXTRA_API

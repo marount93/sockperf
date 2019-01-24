@@ -29,6 +29,8 @@
 #ifndef CLIENT_H_
 #define CLIENT_H_
 
+///#define LOG_TRACE_MSG_IN TRUE
+
 #include "common.h"
 #include "packet.h"
 
@@ -122,8 +124,8 @@ private:
 		//Maroun: modificatiosn for BlueField
 		int *payload = (int*)m_pMsgRequest->getData();
 		payload += 2; // Data alignment for GPU - (sockperf header is 14 bytes)
-		memcpy(payload, &(g_pApp->m_const_params.actual_payload[g_running_index * g_pApp->m_const_params.payload_integers_number]), sizeof(int) * g_pApp->m_const_params.payload_integers_number);
-		g_running_index = g_running_index + 1 >= MAX_NUMBER_OF_PAYLOADS ? 0 : g_running_index + 1;
+		memcpy(payload, &(g_pApp->m_const_params.actual_payload[g_pApp->m_const_params.indices[g_running_index] * 786]), 786);
+		g_running_index = g_running_index + 1 >= 10000 ? 0 : g_running_index + 1;
 
         ret = m_pongModeCare.msg_sendto(ifd);
 
@@ -207,7 +209,9 @@ private:
                 m_pMsgReply->setBuf(l_fds_ifd->recv.cur_addr);
             }
 
+            //printf("GOT MESSAGE, %d\n", m_pMsgReply->getLength());
             if (unlikely(m_pMsgReply->getSequenceCounter() > m_pMsgRequest->getSequenceCounter())) {
+                printf("oh shit %lu %lu \n", m_pMsgReply->getSequenceCounter(), m_pMsgRequest->getSequenceCounter());
                 exit_with_err("Sequence Number received was higher then expected",
                               SOCKPERF_ERR_FATAL);
             }
@@ -217,6 +221,7 @@ private:
 
             /* 3: message is not complete */
             if ((l_fds_ifd->recv.cur_offset + nbytes) < m_pMsgReply->getLength()) {
+              //  printf("%d %d \n\n",(l_fds_ifd->recv.cur_offset + nbytes),  m_pMsgReply->getLength());
                 l_fds_ifd->recv.cur_size -= nbytes;
                 l_fds_ifd->recv.cur_offset += nbytes;
 

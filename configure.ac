@@ -67,7 +67,7 @@ AM_MAINTAINER_MODE
 AC_PROG_CXX
 AC_LANG(C++)
 #AC_PROG_LIBTOOL
-
+AX_CXX_COMPILE_STDCXX_11(ext, mandatory)
 SP_CHECK_CXXFLAGS_APPEND([OUR_CXXFLAGS], [\
                          -Wall \
                          "--param inline-unit-growth=200"])

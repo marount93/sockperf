@@ -86,6 +86,7 @@
 #include "aopt.h"
 #include <stdio.h>
 #include <sys/stat.h>
+#include "zipf.hpp"
 
 #ifndef WIN32
 #include <dlfcn.h>
@@ -126,14 +127,11 @@ static int proc_mode_playback(int, int, const char **);
 static int proc_mode_server(int, int, const char **);
 
 // helper function to generate payload for bluefield workloads
-void generate_payloads(int** ptr, int n) {
-    printf("Start generating data [%d] integer number in paylaod: %d\n", MAX_NUMBER_OF_PAYLOADS, n);
-    *ptr = (int*) malloc(MAX_NUMBER_OF_PAYLOADS * n * sizeof(int));
-    for(int i = 0 ; i < MAX_NUMBER_OF_PAYLOADS ; i++) {
-        for(int j = 0 ; j < n ; j++) {
-            (*ptr)[i * n + j] = i;
-        }
-    }
+void generate_payloads(char** ptr) {
+    printf("Reading %d photos from the dataset\n", 10000);
+    *ptr = (char*) malloc(10000 * 784 * sizeof(char));
+    int fd = open("mnist10k.bin", O_RDONLY);
+    pread(fd, *ptr, 784*10000, 16);
     printf("payload is ready\n");
 }
 
@@ -415,8 +413,8 @@ static int proc_mode_under_load(int id, int argc, const char **argv) {
 		{ 'n',
           AOPT_ARG,
           aopt_set_literal('n'),
-          aopt_set_string("payload number of integers"),
-          "Set number of integers to be sent in payload." },
+          aopt_set_string("Zipf parameter"),
+          "Set Zipf parameter. Default is 0." },
         { 0, AOPT_NOARG, aopt_set_literal(0), aopt_set_string(NULL), NULL }
     };
 
@@ -615,16 +613,23 @@ static int proc_mode_under_load(int id, int argc, const char **argv) {
 		if ( !rc && aopt_check(self_obj, 'n') ) {
             const char* optarg = aopt_value(self_obj, 'n');
             if (optarg) {
-                int value = strtol(optarg, NULL, 0);
+                float value = strtof(optarg, NULL);
                 if (!isNumeric(optarg) || value < 0) {
-                    log_msg("'-%c' Invalid number of integers: %s", 'n', optarg);
+                    log_msg("'-%c' Invalid zipf parameter: %s", 'n', optarg);
                     rc = SOCKPERF_ERR_BAD_ARGUMENT;
                 } else{
-                    s_user_params.payload_integers_number = value;
-                    generate_payloads(&s_user_params.actual_payload, value);
+		    		s_user_params.zipf = value;
+                    generate_payloads(&s_user_params.actual_payload);
+                    printf("skew = %f\n", value);
+                    auto zipf = zipf_distribution<>(10000, value);
+                    std::mt19937 rng;
+                    for (int i = 0; i < 10000; ++i) {
+                         s_user_params.indices.push_back(zipf(rng));
+                    }
                 }
             }
         }
+
     }
 
     if (rc) {
@@ -709,6 +714,12 @@ static int proc_mode_ping_pong(int id, int argc, const char **argv) {
           aopt_set_literal('r'),
           aopt_set_string("range"),
           "comes with -m <size>, randomly change the messages size in range: <size> +- <N>." },
+		{ 'n',
+          AOPT_ARG,
+          aopt_set_literal('n'),
+          aopt_set_string("Zipf parameter"),
+          "Set Zipf parameter. Default is 0." },
+
         { OPT_DATA_INTEGRITY,                AOPT_NOARG,                    aopt_set_literal(0),
           aopt_set_string("data-integrity"), "Perform data integrity test." },
         { 0, AOPT_NOARG, aopt_set_literal(0), aopt_set_string(NULL), NULL }
@@ -1175,13 +1186,19 @@ static int proc_mode_throughput(int id, int argc, const char **argv) {
 		if ( !rc && aopt_check(self_obj, 'n') ) {
             const char* optarg = aopt_value(self_obj, 'n');
             if (optarg) {
-                int value = strtol(optarg, NULL, 0);
+                float value = strtof(optarg, NULL);
                 if (!isNumeric(optarg) || value < 0) {
-                    log_msg("'-%c' Invalid number of integers: %s", 'n', optarg);
+                    log_msg("'-%c' Invalid zipf parameter: %s", 'n', optarg);
                     rc = SOCKPERF_ERR_BAD_ARGUMENT;
                 } else{
-		    		s_user_params.payload_integers_number = value;
-                    generate_payloads(&s_user_params.actual_payload, value);
+		    		s_user_params.zipf = value;
+                    generate_payloads(&s_user_params.actual_payload);
+                    printf("skew = %f\n", value);
+                    auto zipf = zipf_distribution<>(10000, value);
+                    std::mt19937 rng;
+                    for (int i = 0; i < 10000; ++i) {
+                         s_user_params.indices.push_back(zipf(rng));
+                    }
                 }
             }
         }

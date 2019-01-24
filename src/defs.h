@@ -678,8 +678,9 @@ struct user_params_t {
     uint32_t dummy_mps;                   // client side only
     TicksDuration dummySendCycleDuration; // client side only
     uint32_t rate_limit;
-	unsigned int payload_integers_number;
-	int* actual_payload;
+	float zipf;
+	char* actual_payload;
+    std::vector<int> indices;
 };
 
 struct mutable_params_t {};

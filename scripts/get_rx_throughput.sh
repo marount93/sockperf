@@ -11,14 +11,14 @@ pkts_bits=$2
 
 if [ $mode == unicast ] ; then
 	if [ $pkts_bits == packets ] ; then
-		watch -n0 'result=`start=$(ethtool -S p5p1|grep rx_vport_unicast_packets|cut -d: -f2); sleep 1 ; end=$(ethtool -S p5p1|grep rx_vport_unicast_packets|cut -d: -f2); echo $[$end - $start]/1000000 | bc -l`; echo $result Mpps'		
+		watch -n0 'result=`start=$(ethtool -S enp1s0|grep rx_vport_unicast_packets|cut -d: -f2); sleep 1 ; end=$(ethtool -S enp1s0|grep rx_vport_unicast_packets|cut -d: -f2); echo $[$end - $start]/1000000 | bc -l`; echo $result Mpps'		
 	else 
-		watch -n0 'result=`start=$(ethtool -S p5p1|grep rx_vport_unicast_bytes|cut -d: -f2); sleep 1 ; end=$(ethtool -S p5p1|grep rx_vport_unicast_bytes|cut -d: -f2); echo $[8*($end - $start)]/1024/1024/1024 | bc -l`; echo $result Gbps'
+		watch -n0 'result=`start=$(ethtool -S enp1s0|grep rx_vport_unicast_bytes|cut -d: -f2); sleep 1 ; end=$(ethtool -S enp1s0|grep rx_vport_unicast_bytes|cut -d: -f2); echo $[8*($end - $start)]/1024/1024/1024 | bc -l`; echo $result Gbps'
 	fi
 else
 	if [ $pkts_bits == packets ] ; then
-		watch -n0 'result=`start=$(ethtool -S p5p1|grep rx_vport_broadcast_packets|cut -d: -f2); sleep 1 ; end=$(ethtool -S p5p1|grep rx_vport_broadcast_packets|cut -d: -f2); echo $[$end - $start]/1000000 | bc -l`; echo $result Mpps'
+		watch -n0 'result=`start=$(ethtool -S enp1s0|grep rx_vport_broadcast_packets|cut -d: -f2); sleep 1 ; end=$(ethtool -S enp1s0|grep rx_vport_broadcast_packets|cut -d: -f2); echo $[$end - $start]/1000000 | bc -l`; echo $result Mpps'
         else
-		watch -n0 'result=`start=$(ethtool -S p5p1|grep rx_vport_broadcast_bytes|cut -d: -f2); sleep 1 ; end=$(ethtool -S p5p1|grep rx_vport_broadcast_bytes|cut -d: -f2); echo $[8*($end - $start)]/1024/1024/1024 | bc -l`; echo $result Gbps'
+		watch -n0 'result=`start=$(ethtool -S enp1s0|grep rx_vport_broadcast_bytes|cut -d: -f2); sleep 1 ; end=$(ethtool -S enp1s0|grep rx_vport_broadcast_bytes|cut -d: -f2); echo $[8*($end - $start)]/1024/1024/1024 | bc -l`; echo $result Gbps'
         fi
 fi

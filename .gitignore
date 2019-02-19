@@ -10,3 +10,13 @@ doc/Doxyfile
 sockperf
 src/.dirstamp
 *~
+src/*.o
+ul_logs
+Makefile.in
+Makefile
+build/sockperf.spec
+config.txt
+stamp-h1
+tests/Makefile.in
+tools/Makefile.in
+src/.deps

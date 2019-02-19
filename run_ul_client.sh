@@ -1,12 +1,12 @@
 #!/bin/bash
 
 if [ $# -lt 8 ]; then
-	echo "Usage: $0 dest_ip core_number msg_rate_per_client payload_integers_number dest_base_port dest_ports_number time logfile reply_every"
+	echo "Usage: $0 dest_ip core_id msg_rate_per_client payload_integers_number dest_base_port dest_ports_number time logfile reply_every"
 	exit 1
 fi
 
 dest_ip=$1; shift
-core_number=$1; shift
+core_id=$1; shift
 msg_rate_per_client=$1; shift
 payload_integers_number=$1; shift
 sockperf_header=$[14+2]
@@ -32,4 +32,4 @@ for i in `seq 0 1 $[$dest_ports_number-1]`; do
 done
 	
 
-sudo taskset -c $core_number,$[$core_number+1] env LD_PRELOAD=/home/maroun/libvma/src/vma/.libs/libvma.so VMA_MTU=200 VMA_RING_ALLOCATION_LOGIC_RX=20 VMA_RING_ALLOCATION_LOGIC_TX=20 VMA_RX_POLL=1000 VMA_RX_UDP_POLL_OS_RATIO=0 VMA_SELECT_POLL_OS_RATIO=0 VMA_SELECT_POLL=2000000 VMA_THREAD_MODE=1 VMA_RX_POLL_YIELD=0 VMA_RX_NO_CSUM=1 VMA_NICA_ACCESS_MODE=0 $DIR/../sockperf ul -f $DIR/config.txt --dontwarmup --mps $msg_rate_per_client -m $msg_size -n $payload_integers_number -t $time --nonblocked --daemonize --full-log $DIR/$logfile --reply-every $reply_every
+sudo taskset -c $core_id,$[$core_id+1] env LD_PRELOAD=/home/maroun/libvma/src/vma/.libs/libvma.so VMA_MTU=200 VMA_RING_ALLOCATION_LOGIC_RX=20 VMA_RING_ALLOCATION_LOGIC_TX=20 VMA_RX_POLL=1000 VMA_RX_UDP_POLL_OS_RATIO=0 VMA_SELECT_POLL_OS_RATIO=0 VMA_SELECT_POLL=2000000 VMA_THREAD_MODE=1 VMA_RX_POLL_YIELD=0 VMA_RX_NO_CSUM=1 VMA_NICA_ACCESS_MODE=0 $DIR/../sockperf ul -f $DIR/config.txt --dontwarmup --mps $msg_rate_per_client -m $msg_size -n $payload_integers_number -t $time --nonblocked --daemonize --full-log $DIR/$logfile --reply-every $reply_every --full-rtt
